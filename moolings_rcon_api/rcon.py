@@ -14,34 +14,51 @@ class RconError(RuntimeError):
 
 
 async def rcon_get_from_mcdr(
-    s: PluginServerInterface, cmd: str
+    psi: PluginServerInterface, cmd: str
 ) -> Result[Maybe[str], Exception]:
-    if not s.is_rcon_running():
+    if not psi.is_rcon_running():
         return Failure(RconError("Rcon is not running with MCDR!"))
 
     @safe
     def on_query() -> Maybe[str]:
-        future: Future[str | None] = _RCON_EXECUTOR.submit(s.rcon_query, cmd)
-
-        try:
-            raw_result = future.result(timeout=0.5)
-        except TimeoutError:
-            s.logger.warning(
-                "Rcon query timeout, attempting reconnection with private mcdr api..."
-            )
-            s._mcdr_server.connect_rcon()
-            raw_result = future.result(timeout=1.0)
+        raw_result = psi.rcon_query(cmd)
 
         if raw_result is None or raw_result.strip() == "":
             return Nothing
         return Some(raw_result)
 
     try:
-        loop = s.get_event_loop()
+        loop = psi.get_event_loop()
         result = await loop.run_in_executor(_RCON_EXECUTOR, on_query)
         return result
     except Exception as e:
         return Failure(e)
+
+
+def rcon_get_from_mcdr_non_async(
+    psi: PluginServerInterface, cmd: str
+) -> Result[Maybe[str], Exception]:
+    if not psi.is_rcon_running():
+        return Failure(RconError("Rcon is not running with MCDR!"))
+
+    @safe
+    def on_query() -> Maybe[str]:
+        future: Future[str | None] = _RCON_EXECUTOR.submit(psi.rcon_query, cmd)
+
+        try:
+            raw_result = future.result(timeout=0.5)
+        except TimeoutError:
+            psi.logger.warning(
+                "Rcon query timeout, attempting reconnection with private mcdr api..."
+            )
+            psi._mcdr_server.connect_rcon()
+            raw_result = future.result(timeout=1.0)
+
+        if raw_result is None or raw_result.strip() == "":
+            return Nothing
+        return Some(raw_result)
+
+    return on_query()
 
 
 async def init_async_rcon_client(psi: PluginServerInterface):

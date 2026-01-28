@@ -1,0 +1,9 @@
+[project]
+name = "moolings_rcon_api"
+version = "0.0.1"
+description = "Mooling's Rcon API for MCDReforged."
+readme = "README.md"
+requires-python = ">=3.9,<=3.13"
+dependencies = [
+    "mcdreforged>=2.15.7",
+]

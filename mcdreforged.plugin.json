@@ -1,0 +1,16 @@
+{
+    "id": "moolings_rcon_api",
+    "version": "0.0.1",
+    "name": "MoolingsRconAPI",
+    "description": {
+        "en_us": "Mooling's Rcon API for MCDReforged.",
+        "zh_cn": "木泠编写的MCDR Rcon接口。"
+    },
+    "author": "Mooling0602",
+    "link": "https://github.com/Mooling0602/MoolingsRconAPI-MCDR",
+    "dependencies": {
+        "mcdreforged": ">=2.14.1",
+        "python": ">=3.11"
+    },
+    "resources": ["lang"]
+}

@@ -1,0 +1,20 @@
+moolings_rcon_api:
+  on_load:
+    loading: 正在加载木泠的 Rcon API……
+    register_command:
+      registering: 正在向 MCDR 注册命令……
+      registered: 命令已成功注册到 MCDR。
+    finish: Rcon 连接信息将在服务器启动完成后载入。
+  on_server_startup:
+    when_use_asyncrcon_only: 将优先尝试从`asyncrcon`包内导入并初始化 Rcon 客户端。
+    when_use_builtin: 将优先尝试使用 MCDR 的内置 Rcon 客户端。
+    on_config_loaded: 配置已成功加载！
+    on_command:
+      permission_denied: 权限不足！
+      on_error: 出现错误：{e}
+  rcon_api:
+    on_error:
+      built_in_down: MCDR 的 Rcon 客户端未在工作！
+      async_down: 异步 Rcon 客户端尚未初始化完成！
+    warn_built_in_timeout: Rcon 查询超时，正在使用私有 mcdr api 进行重连……
+    async_rcon_client_initialized: 异步 Rcon 客户端已初始化完成！

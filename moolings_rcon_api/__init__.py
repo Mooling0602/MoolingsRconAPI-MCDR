@@ -23,7 +23,7 @@ builder = SimpleCommandBuilder()
 
 async def on_load(psi: PluginServerInterface, _):
     psi.logger.info("Loading Mooling's Rcon API...")
-    psi.logger.info("Registering commands...")
+    psi.logger.info("Registering commands to MCDR...")
     builder.arg("command", GreedyText)
     builder.register(psi)
     psi.logger.info("Commands registered.")
@@ -33,7 +33,7 @@ async def on_load(psi: PluginServerInterface, _):
 
 
 async def on_unload(psi: PluginServerInterface):
-    if rcon_api._RCON_CLIENT is not None:
+    if rcon_api._RCON_CLIENT is not None:  # type: ignore[reportPrivateUsage]
         await close_async_rcon_client(psi)
 
 
@@ -45,6 +45,7 @@ async def on_server_startup(psi: PluginServerInterface):
             "Will try import and init rcon client from asyncrcon package first."
         )
         await init_async_rcon_client(psi)
+        return
     if psi.is_rcon_running():
         psi.logger.info("Will try using built-in rcon client in MCDR first.")
     psi.logger.info("Configurations loaded successfully.")

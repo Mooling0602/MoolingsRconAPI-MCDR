@@ -1,0 +1,22 @@
+moolings_rcon_api:
+  on_load:
+    loading: Loading Mooling's Rcon API...
+    register_command:
+      registering: Registering commands to MCDR...
+      registered: Commands successfully registered to MCDR.
+    finish: Rcon connection information will be loaded after server startup completes.
+  on_server_startup:
+    when_use_asyncrcon_only: Will try to import and initialize Rcon client from `asyncrcon` package first.
+    when_use_builtin: Will try to use MCDR's built-in Rcon client first.
+    on_config_loaded: Configuration successfully loaded!
+    on_command:
+      permission_denied: Permission denied!
+      on_error: "Error: {}"
+      no_response: Command executed, no response.
+  rcon_api:
+    on_error:
+      built_in_down: MCDR's Rcon client is not working!
+      async_down: Async Rcon client has not been initialized yet!
+    warn_built_in_timeout: Rcon query timeout, reconnecting using private mcdr api...
+    async_rcon_client_initialized: Async Rcon client has been initialized!
+    async_rcon_client_closed: Async Rcon client closed!

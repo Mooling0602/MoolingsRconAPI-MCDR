@@ -1,7 +1,7 @@
 from mcdreforged.api.all import PluginServerInterface
 
 
-def tr(server: PluginServerInterface, tr_key: str, return_str: bool = True, *args):
+def tr(server: PluginServerInterface, tr_key: str, return_str: bool = False, *args):
     plg_self = server.get_self_metadata()
     if tr_key.startswith(f"{plg_self.id}"):
         translation = server.rtr(f"{tr_key}")

@@ -20,7 +20,7 @@ class DefaultConfig(Serializable):
     rcon: RconConnectionInfo = RconConnectionInfo()
     ignore: IgnoreOptions = IgnoreOptions()
     allow_mcdr_private_api: bool = True
-    use_asyncrcon_only: bool = False
+    use_asyncrcon_only: bool = True
 
 
 def get_config(psi: PluginServerInterface) -> DefaultConfig:

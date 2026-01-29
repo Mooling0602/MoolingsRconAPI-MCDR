@@ -11,10 +11,12 @@ moolings_rcon_api:
     on_config_loaded: 配置已成功加载！
     on_command:
       permission_denied: 权限不足！
-      on_error: 出现错误：{e}
+      on_error: 出现错误：{}
+      no_response: 命令已执行，但没有回复。
   rcon_api:
     on_error:
       built_in_down: MCDR 的 Rcon 客户端未在工作！
       async_down: 异步 Rcon 客户端尚未初始化完成！
     warn_built_in_timeout: Rcon 查询超时，正在使用私有 mcdr api 进行重连……
     async_rcon_client_initialized: 异步 Rcon 客户端已初始化完成！
+    async_rcon_client_closed: 异步 Rcon 客户端已关闭！

@@ -9,3 +9,7 @@ dependencies = [
     "mcdreforged>=2.15.7",
     "returns>=0.23.0",
 ]
+
+[tool.setuptools.packages.find]
+include = ["moolings_rcon_api*"]
+exclude = ["lang*"]

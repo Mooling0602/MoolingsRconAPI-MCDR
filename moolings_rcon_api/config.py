@@ -28,7 +28,7 @@ def get_config(psi: PluginServerInterface) -> DefaultConfig:
     assert isinstance(config, DefaultConfig)
     if rcon_info is not None:
         config.rcon = rcon_info  # TODO: will prepare for the support of reading from `server.properties`
-    return config  # type: ignore[reportReturnType]
+    return config
 
 
 def get_rcon_info(psi: PluginServerInterface):

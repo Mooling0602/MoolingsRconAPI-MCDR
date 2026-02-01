@@ -9,14 +9,31 @@ moolings_rcon_api:
     when_use_asyncrcon_only: 将优先尝试从`asyncrcon`包内导入并初始化 Rcon 客户端。
     when_use_builtin: 将优先尝试使用 MCDR 的内置 Rcon 客户端。
     on_config_loaded: 配置已成功加载！
-    on_command:
-      permission_denied: 权限不足！
-      on_error: 出现错误：{}
-      no_response: 命令已执行，但没有回复。
+    on_load_config_failed: 加载配置失败！
+  on_command:
+    permission_denied: 权限不足！
+    on_error: 出现错误：{}
+    no_response: 命令已执行，但没有回复。
+    on_debug:
+      on_close_confirm: 这是一个危险的调试命令，请重新执行以确认！
+      on_config_empty: 加载了空的配置！
+      help_message:
+        description: 这是用于调试的命令。
+        valid_usage: 有效用法：
   rcon_api:
     on_error:
       built_in_down: MCDR 的 Rcon 客户端未在工作！
       async_down: 异步 Rcon 客户端尚未初始化完成！
+    on_connection_refused: Rcon 连接被拒绝，请检查你的网络！
+    on_disabled_in_server: Rcon 于本次（服务器运行）在服务器配置中未启用！
     warn_built_in_timeout: Rcon 查询超时，正在使用私有 mcdr api 进行重连……
     async_rcon_client_initialized: 异步 Rcon 客户端已初始化完成！
     async_rcon_client_closed: 异步 Rcon 客户端已关闭！
+    async_rcon_client_opened: 异步 Rcon 客户端已启动！
+    async_rcon_client_error: 连接到异步 Rcon 客户端失败：{}
+    async_rcon_auth_failed: 异步 Rcon 认证失败！
+  server_properties_not_found: 未在指定目录：`{}` 下找到文件 `server.properties`。
+  check_rcon:
+    do_fix: Rcon 未在 `server.properties` 中启用，将修改此文件以启用 Rcon。如果失败，请自行修改！
+    finish_fix: Rcon 已启用，请重启服务器以使其生效！
+  condition_error_message: 必须满足条件！

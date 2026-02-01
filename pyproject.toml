@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "asyncrcon>=1.1.4",
+    "javaproperties>=0.8.2",
     "mcdreforged>=2.15.7",
     "returns>=0.23.0",
 ]

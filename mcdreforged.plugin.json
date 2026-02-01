@@ -1,6 +1,6 @@
 {
     "id": "moolings_rcon_api",
-    "version": "0.0.4",
+    "version": "0.1.0",
     "name": "MoolingsRconAPI",
     "description": {
         "en_us": "Mooling's Rcon API for MCDReforged.",

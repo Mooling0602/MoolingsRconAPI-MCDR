@@ -1,14 +1,14 @@
 [project]
 name = "moolings_rcon_api"
-version = "0.1.0"
+version = "0.1.1"
 description = "Mooling's Rcon API for MCDReforged."
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "asyncrcon>=1.1.4",
-    "javaproperties>=0.8.2",
-    "mcdreforged>=2.15.7",
-    "returns>=0.23.0",
+  "asyncrcon>=1.1.4",
+  "javaproperties>=0.8.2",
+  "mcdreforged>=2.15.7",
+  "returns>=0.23.0",
 ]
 
 [tool.setuptools.packages.find]

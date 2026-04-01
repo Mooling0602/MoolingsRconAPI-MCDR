@@ -15,8 +15,10 @@ class RconConnectionInfo(Serializable):
 
 class DefaultConfig(Serializable):
     rcon: RconConnectionInfo = RconConnectionInfo()
+    allow_edit_server_prop: bool = False
     allow_mcdr_private_api: bool = True
     use_asyncrcon_only: bool = True
+    read_rcon_from_server_prop: bool = True
 
 
 def get_config(psi: PluginServerInterface) -> DefaultConfig:
@@ -75,10 +77,12 @@ def check_if_rcon_enabled(
         server_properties = javaproperties.loads(cache)
     rcon_enabled: bool = json.loads(server_properties["enable-rcon"])
     if not rcon_enabled:
-        psi.logger.info(tr(psi, "check_rcon.do_fix"))
         if do_fix:
+            psi.logger.info(tr(psi, "check_rcon.do_fix"))
             with open(file_path, "w") as f:
                 server_properties["enable-rcon"] = "true"
                 f.write(javaproperties.dumps(server_properties))
+        else:
+            psi.logger.info(tr(psi, "check_rcon.need_edit_config"))
         psi.logger.info(tr(psi, "check_rcon.finish_fix"))
     return rcon_enabled

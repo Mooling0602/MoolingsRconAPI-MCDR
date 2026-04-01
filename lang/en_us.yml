@@ -6,34 +6,36 @@ moolings_rcon_api:
       registered: Commands successfully registered to MCDR.
     finish: Rcon connection information will be loaded after server startup completes.
   on_server_startup:
-    when_use_asyncrcon_only: Will try to import and initialize Rcon client from `asyncrcon` package first.
-    when_use_builtin: Will try to use MCDR's built-in Rcon client first.
+    when_use_asyncrcon_only: Will prioritize trying to import and initialize the Rcon client from the `asyncrcon` package.
+    when_use_builtin: Will prioritize trying to use MCDR's built-in Rcon client.
     on_config_loaded: Configuration successfully loaded!
-    on_load_config_failed: ""
+    on_load_config_failed: Failed to load configuration!
   on_command:
-    permission_denied: Permission denied!
-    on_error: "Error: {}"
-    no_response: Command executed, no response.
+    permission_denied: Insufficient permissions!
+    on_error: "An error occurred: {}"
+    no_response: Command executed, but no response was returned.
     on_debug:
       on_close_confirm: This is a dangerous debugging command, please execute it again to confirm!
       on_config_empty: Loaded empty config!
       help_message:
-        description: "The commands are for debugging."
-        valid_usage: "Valid usage: "
+        description: This command is for debugging.
+        valid_usage: "Valid usage:"
   rcon_api:
     on_error:
       built_in_down: MCDR's Rcon client is not working!
       async_down: Async Rcon client has not been initialized yet!
-    on_connection_refused: Rcon connection refused, check your network please!
-    on_disabled_in_server: Rcon is disabled in `server.properties` at this time!
-    warn_built_in_timeout: Rcon query timeout, reconnecting using private mcdr api...
+    on_connection_refused: Rcon connection refused, check your network or connection configurations please!
+    on_disabled_in_server: Rcon is not enabled in the server configuration for this server run!
+    warn_built_in_timeout: Rcon query timed out, reconnecting using private MCDR API...
     async_rcon_client_initialized: Async Rcon client has been initialized!
     async_rcon_client_closed: Async Rcon client closed!
     async_rcon_client_opened: Async Rcon client started!
     async_rcon_client_error: "Failed to connect async rcon client: {}"
-    async_rcon_auth_failed: Failed to authenticate with Rcon!
-  server_properties_not_found: "Target `server.properties` is not found in: {}"
+    async_rcon_no_passwd_warning: Rcon may need a password to work properly, please edit `server.properties` by yourself and set a valid password.
+    async_rcon_auth_failed: Async Rcon authentication failed!
+  server_properties_not_found: "File `server.properties` was not found in the specified directory: `{}`."
   check_rcon:
-    do_fix: Rcon is not enabled in `server.properties`, will change this file to enable it. If failed, please edit it by yourself!
-    finish_fix: Rcon is now enabled, please restart the server to apply the changes.
+    do_fix: Rcon is not enabled in `server.properties`; this file will be modified to enable Rcon. If it fails, please edit it manually!
+    need_edit_config: You can set plugin config option `allow_edit_server_prop` to True and reload the plugin to automatically modify server configuration!
+    finish_fix: Please modify server and plugin configurations (if they were not modified automatically) and restart the server to make Rcon work.
   condition_error_message: Condition must be satisfied!

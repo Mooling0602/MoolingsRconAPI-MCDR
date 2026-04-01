@@ -53,7 +53,7 @@ def tr(
 
 
 def tr_to_str(server: PluginServerInterface, tr_key: str, *args) -> str:
-    return str(tr(server, tr_key, return_str=True, *args))
+    return str(tr(server, tr_key, True, *args))
 
 
 def get_server_dir(psi: PluginServerInterface, return_default: bool = True) -> str:

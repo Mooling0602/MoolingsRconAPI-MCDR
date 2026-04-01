@@ -14,6 +14,7 @@ import moolings_rcon_api.utils as utils
 from moolings_rcon_api.config import (
     get_config,
     get_rcon_info_from_mcdr,
+    get_rcon_info_from_server,
 )
 from moolings_rcon_api.rcon import (
     close_async_rcon_client,
@@ -21,7 +22,7 @@ from moolings_rcon_api.rcon import (
     rcon_get_from_mcdr,
     test_and_connect,
 )
-from moolings_rcon_api.utils import tr, tr_to_str
+from moolings_rcon_api.utils import tr, tr_to_str, get_server_dir
 
 builder = SimpleCommandBuilder()
 _DEBUG_ASYNC_RCON_CLOSE: bool = False
@@ -41,10 +42,9 @@ async def on_load(psi: PluginServerInterface, _):
 
 
 async def on_unload(psi: PluginServerInterface):
-    if rcon_api._RCON_CLIENT is not None:  # type: ignore[reportPrivateUsage]
+    if rcon_api._RCON_CLIENT is not None:
         await close_async_rcon_client(psi)
         rcon_api._RCON_EXECUTOR.shutdown(wait=True)
-        rcon_api._RCON_EXECUTOR = None
 
 
 async def on_server_startup(psi: PluginServerInterface):
@@ -55,7 +55,11 @@ async def on_server_startup(psi: PluginServerInterface):
         rt.rcon_api_provider = "mcdr"
     else:
         psi.logger.info(tr(psi, "on_server_startup.when_use_asyncrcon_only"))
-        await test_and_connect(psi, rt.config.rcon)
+        if rt.config.read_rcon_from_server_prop:
+            rcon_info = get_rcon_info_from_server(psi, get_server_dir(psi, True))
+        else:
+            rcon_info = rt.config.rcon
+        await test_and_connect(psi, rcon_info)
         rt.rcon_api_provider = "asyncrcon"
     psi.logger.info(tr(psi, "on_server_startup.on_config_loaded"))
 
@@ -76,7 +80,7 @@ async def rcon_get(
 async def on_command_asyncrcon(src: CommandSource, ctx: CommandContext):
     psi = src.get_server().psi()
     if not src.has_permission_higher_than(3):
-        src.reply(tr(psi, "on_server_startup.on_command.permission_denied"))
+        src.reply(tr(psi, "on_command.permission_denied"))
         return
 
     async def on_close():
@@ -112,7 +116,7 @@ async def on_command_asyncrcon(src: CommandSource, ctx: CommandContext):
 async def on_rcon_get(src: CommandSource, ctx: CommandContext):
     psi = src.get_server().psi()
     if not src.has_permission_higher_than(3):
-        src.reply(tr(psi, "on_server_startup.on_command.permission_denied"))
+        src.reply(tr(psi, "on_command.permission_denied"))
         return
     command = ctx["command"]
     result = await rcon_get(psi, command)
@@ -120,6 +124,6 @@ async def on_rcon_get(src: CommandSource, ctx: CommandContext):
         case Success(Some(content)):
             src.reply(content)
         case Success(_):
-            src.reply(tr(psi, "on_server_startup.on_command.no_response"))
+            src.reply(tr(psi, "on_command.no_response"))
         case Failure(e):
-            src.reply(tr(psi, "on_server_startup.on_command.on_error", True, e))
+            src.reply(tr(psi, "on_command.on_error", True, e))

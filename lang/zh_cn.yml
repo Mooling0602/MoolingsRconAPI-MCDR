@@ -24,16 +24,18 @@ moolings_rcon_api:
     on_error:
       built_in_down: MCDR 的 Rcon 客户端未在工作！
       async_down: 异步 Rcon 客户端尚未初始化完成！
-    on_connection_refused: Rcon 连接被拒绝，请检查你的网络！
+    on_connection_refused: Rcon 连接被拒绝，请检查你的网络或连接配置！
     on_disabled_in_server: Rcon 于本次（服务器运行）在服务器配置中未启用！
     warn_built_in_timeout: Rcon 查询超时，正在使用私有 mcdr api 进行重连……
     async_rcon_client_initialized: 异步 Rcon 客户端已初始化完成！
     async_rcon_client_closed: 异步 Rcon 客户端已关闭！
     async_rcon_client_opened: 异步 Rcon 客户端已启动！
     async_rcon_client_error: 连接到异步 Rcon 客户端失败：{}
+    async_rcon_no_passwd_warning: Rcon 可能需要设置密码才能工作，请自行修改 `server.properties` 并设置密码。
     async_rcon_auth_failed: 异步 Rcon 认证失败！
   server_properties_not_found: 未在指定目录：`{}` 下找到文件 `server.properties`。
   check_rcon:
     do_fix: Rcon 未在 `server.properties` 中启用，将修改此文件以启用 Rcon。如果失败，请自行修改！
-    finish_fix: Rcon 已启用，请重启服务器以使其生效！
+    need_edit_config: 可以修改插件配置项 `allow_edit_server_prop` 为 True 并重载插件，以自动修改服务器配置！
+    finish_fix: 请修改服务器和插件配置（若没有自动修改）并重启服务器以使 Rcon 工作！
   condition_error_message: 必须满足条件！

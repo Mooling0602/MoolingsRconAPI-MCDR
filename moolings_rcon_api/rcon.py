@@ -90,9 +90,13 @@ async def test_and_connect(psi: PluginServerInterface, rcon_info: RconConnection
     try:
         await init_async_rcon_client(psi, rcon_info)
     except ConnectionRefusedError:
-        rcon_enabled = check_if_rcon_enabled(psi, get_server_dir(psi))
+        do_fix = False
+        if rt.config.allow_edit_server_prop:
+            do_fix = True
+        rcon_enabled = check_if_rcon_enabled(psi, get_server_dir(psi), do_fix)
         if rcon_enabled:
             psi.logger.error(tr(psi, f"#{rt._module}.rcon_api.on_connection_refused"))
+            psi.logger.error(rcon_info)
         else:
             psi.logger.error(tr(psi, f"#{rt._module}.rcon_api.on_disabled_in_server"))
     except AuthenticationException:
@@ -109,6 +113,11 @@ async def test_and_connect(psi: PluginServerInterface, rcon_info: RconConnection
         psi.logger.error(
             tr(psi, f"#{rt._module}.rcon_api.async_rcon_client_error", False, e)
         )
+        if rcon_info.password == "":
+            psi.logger.warning(
+                tr(psi, f"#{rt._module}.rcon_api.async_rcon_no_passwd_warning")
+            )
+        psi.logger.error(rcon_info)
 
 
 async def init_async_rcon_client(

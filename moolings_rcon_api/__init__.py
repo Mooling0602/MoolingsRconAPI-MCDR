@@ -72,6 +72,14 @@ async def rcon_get(
     return await rcon_get_from_mcdr(psi, cmd)
 
 
+async def rcon_get_result(psi: PluginServerInterface, cmd: str) -> str | None:
+    result = await rcon_get(psi, cmd)
+    match result:
+        case Success(Some(content)):
+            return content
+    return None
+
+
 @builder.command("!!asyncrcon")
 @builder.command("!!asyncrcon <command>")
 @builder.command("!!asyncrcon open_connection")

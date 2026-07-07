@@ -1,4 +1,5 @@
-from concurrent.futures import Future, ThreadPoolExecutor, TimeoutError
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
 
 from asyncrcon import AsyncRCON, AuthenticationException
 from mcdreforged.api.all import PluginServerInterface
@@ -16,6 +17,7 @@ from moolings_rcon_api.utils import get_server_dir, tr
 
 _RCON_EXECUTOR = ThreadPoolExecutor(max_workers=1)
 _RCON_CLIENT: AsyncRCON | None = None
+_RCON_CLIENT_LOCK = asyncio.Lock()
 
 
 class RconError(RuntimeError):
@@ -46,32 +48,6 @@ async def rcon_get_from_mcdr(
         return Failure(e)
 
 
-def rcon_get_from_mcdr_non_async(
-    psi: PluginServerInterface, cmd: str
-) -> Result[Maybe[str], Exception]:
-    if not psi.is_rcon_running():
-        return Failure(
-            RconError(tr(psi, f"#{rt._module}.rcon_api.on_error.built_in_down", True))
-        )
-
-    @safe
-    def on_query() -> Maybe[str]:
-        future: Future[str | None] = _RCON_EXECUTOR.submit(psi.rcon_query, cmd)
-
-        try:
-            raw_result = future.result(timeout=0.5)
-        except TimeoutError:
-            psi.logger.warning(tr(psi, f"#{rt._module}.rcon_api.warn_built_in_timeout"))
-            psi._mcdr_server.connect_rcon()
-            raw_result = future.result(timeout=1.0)
-
-        if raw_result is None or raw_result.strip() == "":
-            return Nothing
-        return Some(raw_result)
-
-    return on_query()
-
-
 async def detect_valid_rcon_info(
     psi: PluginServerInterface, rcon_info_list: list[RconConnectionInfo]
 ) -> bool:
@@ -86,17 +62,21 @@ async def detect_valid_rcon_info(
     return False
 
 
-async def test_and_connect(psi: PluginServerInterface, rcon_info: RconConnectionInfo):
+async def test_and_connect(
+    psi: PluginServerInterface, rcon_info: RconConnectionInfo
+) -> bool:
     rcon_enabled = check_if_rcon_enabled(
         psi, get_server_dir(psi), rt.config.allow_edit_server_prop
     )
     if not rcon_enabled:
         psi.logger.error(tr(psi, f"#{rt._module}.rcon_api.on_disabled_in_server"))
+        return False
     try:
         await init_async_rcon_client(psi, rcon_info)
+        return True
     except ConnectionRefusedError:
         psi.logger.error(tr(psi, f"#{rt._module}.rcon_api.on_connection_refused"))
-        psi.logger.error(rcon_info)
+        return False
     except AuthenticationException:
         detection = await detect_valid_rcon_info(
             psi,
@@ -107,6 +87,7 @@ async def test_and_connect(psi: PluginServerInterface, rcon_info: RconConnection
         )
         if not detection:
             psi.logger.info(tr(psi, f"#{rt._module}.rcon_api.async_rcon_auth_failed"))
+        return detection
     except Exception as e:
         psi.logger.error(
             tr(psi, f"#{rt._module}.rcon_api.async_rcon_client_error", False, e)
@@ -115,34 +96,34 @@ async def test_and_connect(psi: PluginServerInterface, rcon_info: RconConnection
             psi.logger.warning(
                 tr(psi, f"#{rt._module}.rcon_api.async_rcon_no_passwd_warning")
             )
-        psi.logger.error(rcon_info)
+        return False
 
 
 async def init_async_rcon_client(
     psi: PluginServerInterface, rcon_info: RconConnectionInfo
 ):
     global _RCON_CLIENT
-    if _RCON_CLIENT is None:
-        rcon_address: str = rcon_info.host
-        rcon_port: int = rcon_info.port
-        rcon_password: str = rcon_info.password
-        rcon_host = f"{rcon_address}:{rcon_port}"
-        _RCON_CLIENT = AsyncRCON(rcon_host, rcon_password)
-        try:
-            await _RCON_CLIENT.open_connection()
-        except Exception as e:
+    async with _RCON_CLIENT_LOCK:
+        if _RCON_CLIENT is not None:
+            _RCON_CLIENT.close()
             _RCON_CLIENT = None
-            raise e
-        psi.logger.info(
-            tr(psi, f"#{rt._module}.rcon_api.async_rcon_client_initialized")
-        )
+        rcon_host = f"{rcon_info.host}:{rcon_info.port}"
+        client = AsyncRCON(rcon_host, rcon_info.password)
+        try:
+            await client.open_connection()
+        except Exception:
+            raise
+        _RCON_CLIENT = client
+    psi.logger.info(tr(psi, f"#{rt._module}.rcon_api.async_rcon_client_initialized"))
 
 
 async def close_async_rcon_client(psi: PluginServerInterface):
     global _RCON_CLIENT
-    if _RCON_CLIENT is not None:
-        _RCON_CLIENT.close()
-        psi.logger.info(tr(psi, f"#{rt._module}.rcon_api.async_rcon_client_closed"))
+    async with _RCON_CLIENT_LOCK:
+        if _RCON_CLIENT is not None:
+            _RCON_CLIENT.close()
+            _RCON_CLIENT = None
+            psi.logger.info(tr(psi, f"#{rt._module}.rcon_api.async_rcon_client_closed"))
 
 
 async def rcon_get_from_async(cmd: str) -> Result[Maybe[str], Exception]:
@@ -150,18 +131,35 @@ async def rcon_get_from_async(cmd: str) -> Result[Maybe[str], Exception]:
         if not rt._PSI:
             return Failure(RconError("Async Rcon client has not been initialized yet!"))
         return Failure(RconError(tr(rt._PSI, "rcon_api.on_error.async_down", True)))
-    client = _RCON_CLIENT
 
-    async def on_query():
+    async def on_query(client: AsyncRCON):
         result = await client.command(cmd)
         if result is None or result.strip() == "":
             return Success(Nothing)
         return Success(Some(result))
 
     try:
-        return await on_query()
+        async with _RCON_CLIENT_LOCK:
+            client = _RCON_CLIENT
+            if client is None:
+                return Failure(
+                    RconError(tr(rt._PSI, "rcon_api.on_error.async_down", True))
+                )
+            return await on_query(client)
     except ConnectionResetError:
-        await client.open_connection()
-        return await on_query()
+        async with _RCON_CLIENT_LOCK:
+            client = _RCON_CLIENT
+            if client is None:
+                return Failure(
+                    RconError(tr(rt._PSI, "rcon_api.on_error.async_down", True))
+                )
+            await client.open_connection()
+            return await on_query(client)
     except Exception as e:
         return Failure(e)
+
+
+def shutdown_rcon_executor():
+    global _RCON_EXECUTOR
+    _RCON_EXECUTOR.shutdown(wait=True)
+    _RCON_EXECUTOR = ThreadPoolExecutor(max_workers=1)

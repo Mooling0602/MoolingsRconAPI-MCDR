@@ -34,6 +34,7 @@ moolings_rcon_api:
     async_rcon_no_passwd_warning: Rcon may need a password to work properly, please edit `server.properties` by yourself and set a valid password.
     async_rcon_auth_failed: Async Rcon authentication failed!
   server_properties_not_found: "File `server.properties` was not found in the specified directory: `{}`."
+  server_properties_missing_key: "Missing required key(s) in `server.properties`: {}."
   check_rcon:
     do_fix: Rcon is not enabled in `server.properties`; this file will be modified to enable Rcon. If it fails, please edit it manually!
     need_edit_config: You can set plugin config option `allow_edit_server_prop` to True and reload the plugin to automatically modify server configuration!

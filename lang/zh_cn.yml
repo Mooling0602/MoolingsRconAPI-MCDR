@@ -34,6 +34,7 @@ moolings_rcon_api:
     async_rcon_no_passwd_warning: Rcon 可能需要设置密码才能工作，请自行修改 `server.properties` 并设置密码。
     async_rcon_auth_failed: 异步 Rcon 认证失败！
   server_properties_not_found: 未在指定目录：`{}` 下找到文件 `server.properties`。
+  server_properties_missing_key: "`server.properties` 中缺少必要字段：{}。"
   check_rcon:
     do_fix: Rcon 未在 `server.properties` 中启用，将修改此文件以启用 Rcon。如果失败，请自行修改！
     need_edit_config: 可以修改插件配置项 `allow_edit_server_prop` 为 True 并重载插件，以自动修改服务器配置！

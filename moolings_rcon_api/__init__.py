@@ -22,7 +22,7 @@ from moolings_rcon_api.rcon import (
     rcon_get_from_mcdr,
     test_and_connect,
 )
-from moolings_rcon_api.utils import tr, tr_to_str, get_server_dir
+from moolings_rcon_api.utils import get_server_dir, tr, tr_to_str
 
 builder = SimpleCommandBuilder()
 _DEBUG_ASYNC_RCON_CLOSE: bool = False
@@ -42,9 +42,8 @@ async def on_load(psi: PluginServerInterface, _):
 
 
 async def on_unload(psi: PluginServerInterface):
-    if rcon_api._RCON_CLIENT is not None:
-        await close_async_rcon_client(psi)
-        rcon_api._RCON_EXECUTOR.shutdown(wait=True)
+    await close_async_rcon_client(psi)
+    rcon_api.shutdown_rcon_executor()
 
 
 async def on_server_startup(psi: PluginServerInterface):
@@ -55,12 +54,14 @@ async def on_server_startup(psi: PluginServerInterface):
         rt.rcon_api_provider = "mcdr"
     else:
         psi.logger.info(tr(psi, "on_server_startup.when_use_asyncrcon_only"))
+        rt.rcon_api_provider = "asyncrcon"
         if rt.config.read_rcon_from_server_prop:
             rcon_info = get_rcon_info_from_server(psi, get_server_dir(psi, True))
         else:
             rcon_info = rt.config.rcon
-        await test_and_connect(psi, rcon_info)
-        rt.rcon_api_provider = "asyncrcon"
+        rt.config.rcon = rcon_info
+        if not await test_and_connect(psi, rcon_info):
+            return
     psi.logger.info(tr(psi, "on_server_startup.on_config_loaded"))
 
 
@@ -107,9 +108,13 @@ async def on_command_asyncrcon(src: CommandSource, ctx: CommandContext):
         await rcon_api.init_async_rcon_client(psi, rt.config.rcon)
         src.reply(tr(psi, "rcon_api.async_rcon_client_opened"))
 
-    if "close" in ctx.command:
+    command = ctx.get("command")
+    if command is None:
+        command_parts = ctx.command.split(maxsplit=1)
+        command = command_parts[1] if len(command_parts) == 2 else ""
+    if command in {"close", "close --confirm"}:
         await on_close()
-    elif "open_connection" in ctx.command:
+    elif command == "open_connection":
         await on_open_connection()
     else:
         help_message = f"""{tr(psi, "on_command.on_debug.help_message.description")}
@@ -130,6 +135,9 @@ async def on_rcon_get(src: CommandSource, ctx: CommandContext):
     result = await rcon_get(psi, command)
     match result:
         case Success(Some(content)):
+            if content is None:
+                src.reply(tr(psi, "on_command.no_response"))
+                return
             src.reply(content)
         case Success(_):
             src.reply(tr(psi, "on_command.no_response"))
